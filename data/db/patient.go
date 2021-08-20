@@ -192,19 +192,6 @@ func Remove(db *sql.DB, id int) (ok bool) {
 	return
 }
 
-func AddPerson(db *sql.DB, p data.Patient) (id int64, ok bool) {
-	stmt, err := db.Prepare("insert into patient(name, surname, birthdate) values  (?, ?, ?)")
-	checkErr(err)
-	var res sql.Result
-	res, err = stmt.Exec(p.Name, p.Surname, p.Birthdate)
-	checkErr(err)
-	id, err = res.LastInsertId()
-	ok = err == nil
-	checkErr(err)
-	defer stmt.Close()
-	return
-}
-
 func readPatient(scanner *sql.Rows) (p *data.Patient) {
 
 	var name string
@@ -252,25 +239,7 @@ func ReadPersons(db *sql.DB, cons func(p data.Patient)) {
 	rows.Close()
 }
 
-func MainDb() {
-	db, err := sql.Open("sqlite3", os.Args[1])
-
-	checkErr(err)
-	defer db.Close()
-
-	ReadPersons(db, PrintPerson)
-	kasiaid, ok := AddPerson(db, data.NewPatient(-1, "Kasia", "Mściborska", data.Date("2012-03-03"), -1, ""))
-	ReadPersons(db, PrintPerson)
-	if ok {
-		Remove(db, int(kasiaid))
-		ReadPersons(db, PrintPerson)
-	}
-}
-
-func PrintPerson(p data.Patient) {
-	fmt.Printf("%v (link: %s)\n", p, p.GetLink())
-}
-
+/* Panics if error is not nil */
 func checkErr(err error) {
 	if err != nil {
 		panic(err)

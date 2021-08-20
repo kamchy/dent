@@ -15,10 +15,6 @@ import (
 	"kamilachyla.com/go/dent/data/db"
 )
 
-func maintest() {
-	// TODO remove Mainb
-	db.MainDb()
-}
 func createFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"equal": func(a int, b int) bool {
@@ -124,7 +120,6 @@ func main() {
 	r.POST("/newpatient", func(c *gin.Context) {
 		var patWithNote, err = BindPatient(c)
 		var id int
-		//log.Printf("Pat with note P.OST /newpatient: %v\n", patWithNote)
 		if err == nil {
 			id, err = patients.Add(patWithNote)
 		}
