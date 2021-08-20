@@ -2,7 +2,9 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -17,26 +19,87 @@ type SQLitePatientDao struct {
 	Db *sql.DB
 }
 
-func GetPatientsDao() data.PatientDao {
-	db, err := sql.Open("sqlite3", os.Args[1])
+var db *sql.DB
 
-	checkErr(err)
-	return SQLitePatientDao{db}
+const DEFAULT_DATABASE = "./database.db"
+
+/* Creates database in given location and runs db/create.sql*/
+func createEmptyDb(fname string) (res string, err error) {
+
+	if db, err := sql.Open("sqlite3", fname); err == nil {
+		defer func() {
+			if r := recover(); r != nil {
+				res, err = "", r.(error)
+			}
+			db.Close()
+		}()
+
+		c, ioErr := ioutil.ReadFile("db/create.sql")
+		checkErr(ioErr)
+		sql := string(c)
+		_, err := db.Exec(sql)
+		checkErr(err)
+		return fname, nil
+	}
+	return "", err
+}
+
+/* Gets the name of database passed in commandline arg or
+* the name of newly created and initialized db in location
+* pointed to by DEFAULT_DATABASE */
+func getDbFileName() (string, error) {
+	var fname = DEFAULT_DATABASE
+	if len(os.Args) > 1 {
+		fname = os.Args[1]
+	}
+	if _, err := os.Stat(fname); err == nil {
+		return fname, nil
+	} else if os.IsNotExist(err) {
+		return createEmptyDb(fname)
+	}
+	return "", errors.New(fmt.Sprintf("Status pliku %s nieznany", fname))
+}
+
+/* Returns package-local var db *sql.DB - initialized lazily */
+func GetDatabase() (db *sql.DB, err error) {
+	var dbname string
+	if db == nil {
+		if dbname, err = getDbFileName(); err != nil {
+			return nil, err
+		}
+
+		if db, err = sql.Open("sqlite3", dbname); err == nil {
+			return db, nil
+		} else {
+			return nil, err
+		}
+	}
+	return db, nil
+}
+
+/* Returns an instance of PatientsDao that connects to
+* a database given in commandline*/
+func GetPatientsDao() (dao data.PatientDao, err error) {
+	if db, err := GetDatabase(); err == nil {
+		dao = SQLitePatientDao{db}
+	}
+	return dao, err
 }
 
 const GET_BY_ID = "select p.id, p.name, p.surname, p.birthdate, n.id, n.text from patient p left join note n on p.note_id = n.id where p.id=?"
 
-func (dao SQLitePatientDao) GetById(id int) (pat data.Patient) {
+func (dao SQLitePatientDao) GetById(id int) (pat *data.Patient) {
 
 	db := dao.Db
 	row, err := db.Query(GET_BY_ID, id)
 	checkErr(err)
 	for row.Next() {
-		pat = *readPatient(row)
+		pat = readPatient(row)
 	}
 	log.Printf("GetById [%d]: query %s\nresult: %v\n", id, GET_BY_ID, pat)
 	return
 }
+
 func (dao SQLitePatientDao) GetAll() (all []data.Patient) {
 	db := dao.Db
 	res := make([]data.Patient, 0)

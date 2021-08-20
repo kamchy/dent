@@ -30,7 +30,7 @@ type PatientDao interface {
 	Add(e Patient) (id int, err error)
 	Remove(id int) (ok bool)
 	UpdatePatient(e *Patient) error
-	GetById(id int) Patient
+	GetById(id int) *Patient
 }
 
 const DATE_LAYOUT = "2006-01-02"

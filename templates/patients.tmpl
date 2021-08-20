@@ -16,9 +16,11 @@
         {{ template "patient_add.tmpl" .}}
       </div>
       <div class="column">
+        {{ if .curr }}
         <form action={{.formdata.Action}} method={{.formdata.Method}}>
         {{ template "patient.tmpl" .}}
         </form>
+      {{end}}
 
       </div>
     </div>

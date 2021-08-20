@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -32,7 +33,11 @@ func main() {
 	r.Static("assets", "./assets")
 	r.LoadHTMLGlob("templates/*")
 
-	var patients = db.GetPatientsDao()
+	patients, err := db.GetPatientsDao()
+	if err != nil {
+		log.Println(err.Error())
+		os.Exit(1)
+	}
 
 	// do testowania
 	r.GET("/ping", func(c *gin.Context) {
@@ -67,13 +72,16 @@ func main() {
 			v = -1
 		}
 		var all = patients.GetAll()
-		c.HTML(http.StatusOK, "patients.tmpl", gin.H{
+		var data = gin.H{
 			"title":    "Pacjenci",
 			"nav":      getNav(),
 			"pat":      all,
-			"curr":     patients.GetById(v),
 			"formdata": FormData{Action: fmt.Sprintf("/patient/%d", v), Method: "POST"},
-		})
+		}
+		if curr := patients.GetById(v); curr != nil {
+			data["curr"] = curr
+		}
+		c.HTML(http.StatusOK, "patients.tmpl", data)
 	})
 
 	r.GET("/newpatient", func(c *gin.Context) {
