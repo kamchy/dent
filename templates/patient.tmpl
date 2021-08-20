@@ -1,0 +1,57 @@
+<div class="field">
+  <label class="label">Imię</label>
+  <div class="control">
+    <input class="input" type="text" name="name" placeholder="Imię pacjenta" value={{.curr.Name}}>
+    <span class="icon is-small is-left">
+      <i class="fas fa-user"></i>
+    </span>
+  </div>
+</div>
+
+<div class="field">
+  <label class="label">Nazwisko</label>
+  <div class="control has-icons-left has-icons-right">
+    <input class="input" name="surname" type="text" placeholder="Nazwisko pacjenta" value={{.curr.Surname }}>
+    <span class="icon is-small is-left">
+      <i class="fas fa-user"></i>
+    </span>
+  </div>
+</div>
+
+<div class="field">
+  <label class="label">Data urodzenia</label>
+  <div class="control has-icons-left has-icons-right">
+    <input class="input" type="date" name="birthdate" placeholder="2021-02-01" value={{.curr.BirthString}}>
+    <span class="icon is-small is-left">
+      <i class="fas fa-calendar"></i>
+    </span>
+  </div>
+</div>
+
+
+<div class="field">
+  <label class="label">Notatka</label>
+  <div class="control">
+    <textarea class="textarea" name="note" placeholder="Adnotacje o pacjencie ">
+      {{- .curr.Note -}}
+    </textarea>
+  </div>
+</div>
+
+<input name="note_id" type="hidden" value={{.curr.NoteId}}> </input>
+<input name="id" type="hidden" value={{.curr.Id}}></input>
+
+<div class="field is-grouped">
+  <div class="control">
+    <button type="submit" class="button is-link" type="submit">Zapisz</button>
+  </div>
+  <div class="control">
+    <button class="button is-link is-light">Anuluj</button>
+  </div>
+</div>
+
+{{ with .err }}
+<div class="notification is-danger">
+  {{.}}
+</div>
+{{ end }}

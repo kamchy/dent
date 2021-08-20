@@ -9,7 +9,21 @@
       Lista pacjentów, dodawanie pacjentów, wyszukiwanie etc.
       </p>
     </div>
+  <section class="section">
+    <div class="container columns">
+      <div class="column">
+        {{ template "plist.tmpl" .}}
+        {{ template "patient_add.tmpl" .}}
+      </div>
+      <div class="column">
+        <form action={{.formdata.Action}} method={{.formdata.Method}}>
+        {{ template "patient.tmpl" .}}
+        </form>
+
+      </div>
+    </div>
   </section>
-  {{ template "plist.tmpl" .}}
+
+  </section>
 {{ end }}
 {{ template "footer.tmpl" .}}

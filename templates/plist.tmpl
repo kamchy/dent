@@ -1,4 +1,4 @@
-<section>
+
 <table class="table">
   <thead>
     <th>Nr</th>
@@ -7,16 +7,23 @@
     <th>Akcja</th>
   </thead>
   <tbody>
-    {{ range .pat }}
-      <tr >
+    {{ range $r := .pat }}
+      <tr 
+       {{if $.curr  }}
+       {{ if equal $r.Id $.curr.Id}} 
+         class="is-selected" 
+       {{end}}
+       {{end}}
+      >
         <th>
-          {{ .Id }}
+          {{ $r.Id }}
         </th>
-        <td>{{.Name}}</td>
-        <td>{{.Surname}}</td>
-        <td><a href="{{.GetLink}}">Pokaż</a></td>
+        <td>{{$r.Name}}</td>
+        <td>{{$r.Surname}}</td>
+        <td><a href="{{$r.GetLink}}">Pokaż</a></td>
       </tr>
     {{end}}
-  </tbody>
+   </tbody>
 </table>
-</section>
+
+
