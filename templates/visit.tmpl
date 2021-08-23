@@ -1,0 +1,57 @@
+
+<div class="field">
+  <label class="label">Pacjent</label>
+  <div class="control">
+    <input class="input is-static" type="text" name="name" placeholder="Imię pacjenta" value="{{.currvis.Name}} {{.currvis.Surname }}">
+    <span class="icon is-small is-left">
+      <i class="fas fa-user"></i>
+    </span>
+  </div>
+</div>
+<div class="field">
+  <label class="label">Data wizyty</label>
+  <div class="control has-icons-left has-icons-right">
+    <input class="input" type="date" name="visitdateonly" placeholder="2021-02-01" value={{.currvis.VisitDateString}}>
+    <span class="icon is-small is-left">
+      <i class="fas fa-calendar"></i>
+    </span>
+  </div>
+</div>
+
+<div class="field">
+  <label class="label">Godzina</label>
+  <div class="control has-icons-left has-icons-right">
+    <input class="input" type="time" name="visittimeonly" placeholder="17:21" value={{.currvis.VisitTimeString}}>
+    <span class="icon is-small is-left">
+      <i class="fas fa-clock"></i>
+    </span>
+  </div>
+</div>
+
+<div class="field">
+  <label class="label">Notatka</label>
+  <div class="control">
+    <textarea class="textarea" name="note" placeholder="Adnotacje na temat wizyty ">
+      {{- .currvis.Note -}}
+    </textarea>
+  </div>
+</div>
+
+<input name="nid" type="hidden" value={{.currvis.NoteId}}> </input>
+<input name="pid" type="hidden" value={{.currvis.PatientId}}></input>
+<input name="vid" type="hidden" value={{.currvis.Id}}></input>
+
+<div class="field is-grouped">
+  <div class="control">
+    <button type="submit" class="button is-link" type="submit">Zapisz</button>
+  </div>
+  <div class="control">
+    <button class="button is-link is-light">Anuluj</button>
+  </div>
+</div>
+
+{{ with .err }}
+<div class="notification is-danger">
+  {{.}}
+</div>
+{{ end }}

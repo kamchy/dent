@@ -1,14 +1,32 @@
 {{ template "header.tmpl" .}}
 {{ block "vis" . }}
   <section class="section">
-    <div class="container">
       <h1 class="title">
         Wizyty
       </h1>
       <p class="subtitle">
-      Lista wizyt
+      {{ if not .curr }}
+      Lista wizyt 
+    {{ else }}
+      {{.curr.Name}} {{.curr.Surname}}
+      {{end}}
       </p>
-    </div>
   </section>
+  <section class="section">
+    <div class="columns">
+        <div class="column">
+              {{ template "vlist.tmpl" .}}
+              {{ template "visit_add.tmpl" .}}
+        </div>
+        <div class="column">
+        {{ if .currvis }}
+          <form action={{.formdata.Action}} 
+            method={{.formdata.Method}}>
+          {{ template "visit.tmpl" .}}
+          </form>
+        {{end}}
+        </div>
+      </div>
+    </section>
 {{ end }}
 {{ template "footer.tmpl" .}}

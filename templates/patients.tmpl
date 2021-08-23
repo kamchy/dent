@@ -1,16 +1,15 @@
 {{ template "header.tmpl" .}}
 {{ block "pat" . }}
   <section class="section">
-    <div class="container">
       <h1 class="title">
         Pacjenci
       </h1>
       <p class="subtitle">
-      Lista pacjentów, dodawanie pacjentów, wyszukiwanie etc.
+      Lista pacjentów, dodawanie pacjentów, wyszukiwanie.
       </p>
     </div>
   <section class="section">
-    <div class="container columns">
+      <div class="columns">
       <div class="column">
         {{ template "plist.tmpl" .}}
         {{ template "patient_add.tmpl" .}}
@@ -24,8 +23,6 @@
 
       </div>
     </div>
-  </section>
-
   </section>
 {{ end }}
 {{ template "footer.tmpl" .}}

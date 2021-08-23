@@ -8,7 +8,7 @@ To run this program, execute:
 Route /patients:
 - button next perhaps at the top?
 - if no persons, be ready to post entered data
-- if there are persons, always select first one on /patients
+[ok]- if there are persons, always select first one on /patients
 - the table should have pagination for browsing; state should remeber current page 
 - add search field that loads only persons with given string
 - add pane with all visits of selected person (view only)
@@ -16,8 +16,10 @@ Route /patients:
 
 ## Visits
 Route /patients/:pat/visits
- - list of all visits of given patient
+ [ok] list of all visits of given patient
  - pagination
- - each line has "show" that displays visit details
+ [ok] each line has "show" that displays visit details
  - button "new visit" at the top?
- 
+
+## Table
+Selection - maybe clickable whole row?

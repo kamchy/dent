@@ -1,0 +1,39 @@
+<table class="table">
+  <thead>
+    <th>Nr wizyty</th>
+    <th>Imię</th>
+    <th>Nazwisko</th>
+    <th>Data</th>
+    <th>Pokaż</th>
+  </thead>
+  <tbody>
+    {{ range $r := .visits}}
+      <tr 
+       {{if $.currvis  }}
+         {{ if eq $r.Id $.currvis.Id}} 
+           class="is-selected" 
+         {{end}}
+       {{end}}
+      >
+        <th>
+          {{ $r.Id }}
+        </th>
+        <td>{{$r.Name}}</td>
+        <td>{{$r.Surname}}</td>
+        <td>{{$r.VisitDateString}}</td>
+        <td><a href="{{$r.GetLink}}">Pokaż</a></td>
+      </tr>
+    {{end}}
+   </tbody>
+</table>
+
+  <div class="section">
+{{ if not .visits }}
+{{ if  .curr }}
+    <h2> {{.curr.Name }} {{.curr.Surname}} nie ma jeszcze żadnych wizyt. </h2>
+{{end}}
+  <p> Aby dodać wizytę, wciśnij przycisk "Dodaj" </p>
+  </div>
+{{end}}
+
+

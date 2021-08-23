@@ -6,12 +6,12 @@ import (
 )
 
 type Patient struct {
-	Name      string    `json:"name"`
-	Surname   string    `json:"surname"`
-	Birthdate time.Time `json:"birthdate"`
-	NoteId    int       `json:"note_id"`
-	Note      string    `json:"note"`
-	Id        int       `json:"id,omitempty"`
+	Name      string
+	Surname   string
+	Birthdate time.Time
+	NoteId    int
+	Note      string
+	Id        int
 }
 
 func NewPatient(id int, name string, surname string, birthdate time.Time, note_id int, note string) Patient {
@@ -21,8 +21,17 @@ func NewPatient(id int, name string, surname string, birthdate time.Time, note_i
 func (p Patient) GetLink() string {
 	return fmt.Sprintf("/patient/%d", p.Id)
 }
+func (p Patient) GetVisits() string {
+	return fmt.Sprintf("/patients/%d/visits", p.Id)
+
+}
 func (p Patient) BirthString() string {
-	return p.Birthdate.Format("2006-01-02")
+	return p.Birthdate.Format(DATE_LAYOUT)
+}
+
+func (p Patient) String() string {
+	return fmt.Sprintf("PATIENT[%d] %s %s %s - note [%d]<%s>",
+		p.Id, p.Name, p.Surname, p.BirthString(), p.NoteId, p.Note)
 }
 
 type PatientDao interface {
@@ -41,13 +50,4 @@ func Date(s string) time.Time {
 		return res
 	}
 	return time.Now()
-}
-
-type Note struct {
-	Id   int    `json:"id"`
-	Text string `json:"text"`
-}
-
-func NewNote(text string) Note {
-	return Note{-1, text}
 }

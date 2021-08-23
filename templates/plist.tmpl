@@ -4,13 +4,14 @@
     <th>Nr</th>
     <th>Imię</th>
     <th>Nazwisko</th>
-    <th>Akcja</th>
+    <th>Dane</th>
+    <th>Wizyty</th>
   </thead>
   <tbody>
     {{ range $r := .pat }}
       <tr 
        {{if $.curr  }}
-       {{ if equal $r.Id $.curr.Id}} 
+       {{ if eq $r.Id $.curr.Id}} 
          class="is-selected" 
        {{end}}
        {{end}}
@@ -20,10 +21,18 @@
         </th>
         <td>{{$r.Name}}</td>
         <td>{{$r.Surname}}</td>
-        <td><a href="{{$r.GetLink}}">Pokaż</a></td>
+        <td><a href="{{$r.GetLink}}">Dane</a></td>
+        <td><a href="{{$r.GetVisits}}">Wizyty</a></td>
       </tr>
     {{end}}
    </tbody>
 </table>
+
+{{ if not .pat }}
+  <div class="section">
+  <h2> Nie ma jeszcze żadnego pacjenta. </h2>
+  <p> Aby dodać pacjenta, wciśnij przycisk "Dodaj" </p>
+  </div>
+{{end}}
 
 
