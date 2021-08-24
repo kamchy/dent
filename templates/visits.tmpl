@@ -1,18 +1,18 @@
 {{ template "header.tmpl" .}}
 {{ block "vis" . }}
-  <section class="section">
+  <div class="section">
       <h1 class="title">
         Wizyty
       </h1>
       <p class="subtitle">
       {{ if not .curr }}
       Lista wizyt 
-    {{ else }}
+      {{ else }}
       {{.curr.Name}} {{.curr.Surname}}
       {{end}}
       </p>
-  </section>
-  <section class="section">
+  </div>
+  <div class="section">
     <div class="columns">
         <div class="column">
               {{ template "vlist.tmpl" .}}
@@ -27,6 +27,6 @@
         {{end}}
         </div>
       </div>
-    </section>
+    </div>
 {{ end }}
 {{ template "footer.tmpl" .}}

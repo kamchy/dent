@@ -27,11 +27,13 @@
    </tbody>
 </table>
 
-  <div class="section">
 {{ if not .visits }}
 {{ if  .curr }}
+  <div class="section">
     <h2> {{.curr.Name }} {{.curr.Surname}} nie ma jeszcze żadnych wizyt. </h2>
+  </div>
 {{end}}
+  <div class="section">
   <p> Aby dodać wizytę, wciśnij przycisk "Dodaj" </p>
   </div>
 {{end}}
