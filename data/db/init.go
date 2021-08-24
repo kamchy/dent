@@ -22,12 +22,13 @@ func createAndInitDb(fname string) (err error) {
 	if db, err := sql.Open("sqlite3", fname); err == nil {
 		defer func() {
 			if r := recover(); r != nil {
-				log.Println("In defer, recover != nil")
 				err = r.(error)
+				log.Printf("In defer, recover != nil, %v", err)
 			}
 			db.Close()
 		}()
 
+		log.Println("Reading file db/create.sql")
 		c, ioErr := ioutil.ReadFile("db/create.sql")
 		checkErr(ioErr)
 		sql := string(c)

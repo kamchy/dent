@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	"log"
-	"strings"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -48,35 +47,39 @@ func (dao SQLitePatientDao) GetAll() (all []data.Patient) {
 	return res
 }
 
+/* Adds patient with note to database. Note is created even if empty*/
 func (dao SQLitePatientDao) Add(e data.Patient) (id int, er error) {
 	log.Printf("Adding: %v\n", e)
 	tx, err := dao.Db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			id, er = -1, r.(error)
+			log.Println("Rollback adding patient: ", er.Error())
+			checkErr(tx.Rollback())
+		} else {
+			log.Println("Commit adding patient: ", e)
+			checkErr(tx.Commit())
+		}
+	}()
 	checkErr(err)
 	var note_id int64
-	if strings.Trim(e.Note, " ") != "" {
-		res, err := tx.Exec("insert into note(text) values (?)", e.Note)
-		if err != nil {
-			tx.Rollback()
-			checkErr(err)
-		}
-		note_id, err = res.LastInsertId()
-		checkErr(err)
-		log.Printf("Added %v", e)
-	}
+	res, err := tx.Exec("insert into note(text) values (?)", e.Note)
+	checkErr(err)
 
-	res, err := tx.Exec("insert into patient(name, surname, birthdate, note_id) values (?, ?, ?, ?)", e.Name, e.Surname, e.Birthdate, note_id)
-	if err != nil {
-		tx.Rollback()
-		log.Fatal(err)
-	}
+	note_id, err = res.LastInsertId()
+	checkErr(err)
+	e.NoteId = int(note_id)
+	log.Printf("Addeda note [%d] %s", note_id, e.Note)
+
+	res, err = tx.Exec("insert into patient(name, surname, birthdate, note_id) values (?, ?, ?, ?)", e.Name, e.Surname, e.Birthdate, e.NoteId)
+	checkErr(err)
 
 	pid, err := res.LastInsertId()
-	if err == nil {
-		checkErr(tx.Commit())
-		return int(pid), nil
-	}
-	return -1, err
+	e.Id = int(pid)
+	log.Printf("Addeda patient [%d] %s", pid, e.String())
+	checkErr(err)
 
+	return e.Id, nil
 }
 
 func (dao SQLitePatientDao) Remove(id int) (ok bool) {
@@ -89,9 +92,10 @@ func (dao SQLitePatientDao) UpdatePatient(e *data.Patient) (er error) {
 	tx, err := dao.Db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
+			er = r.(error)
 			log.Println("UpdatePatient: recover != nill, rollback")
-			log.Printf("Reason: %s\n", r.(error).Error())
-			tx.Rollback()
+			log.Printf("Reason: %s\n", er.Error())
+			checkErr(tx.Rollback())
 		} else {
 			log.Println("UpdatePatient: recover == nill, commit")
 			checkErr(tx.Commit())

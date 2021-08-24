@@ -53,6 +53,9 @@ func DefinePatientRoutes(r *gin.Engine) {
 
 	r.GET("/newpatient", func(c *gin.Context) {
 		var patWithNote data.Patient
+		patWithNote.Id = -1
+		patWithNote.NoteId = -1
+		patWithNote.Birthdate = time.Date(2000, 1, 1, 12, 0, 0, 0, time.Local)
 		c.HTML(http.StatusOK, "patients.tmpl", gin.H{
 			"title":    "Nowy pacjent",
 			"nav":      getNav(),
@@ -64,14 +67,13 @@ func DefinePatientRoutes(r *gin.Engine) {
 
 	var BindPatient = func(c *gin.Context) (data.Patient, error) {
 		var patWithNote data.Patient
-
 		var err error
 		patWithNote.Name = c.PostForm("name")
 		formId := c.PostForm("id")
 		if id, err := strconv.Atoi(formId); err == nil {
 			patWithNote.Id = id
 		} else {
-			return patWithNote, err
+			patWithNote.NoteId = -1
 		}
 
 		patWithNote.Surname = c.PostForm("surname")
@@ -88,12 +90,12 @@ func DefinePatientRoutes(r *gin.Engine) {
 
 	r.POST("/newpatient", func(c *gin.Context) {
 		var patWithNote, err = BindPatient(c)
+		log.Printf("POST /newpatient: bind returned %s\n", patWithNote.String())
 		var id int
 		if err == nil {
 			id, err = patients.Add(patWithNote)
+			log.Printf("POST newpatient after add: id=%d, patWithNote.Id=%d\n", id, patWithNote.Id)
 		}
-
-		patWithNote.Id = id
 		c.HTML(http.StatusOK, "patients.tmpl", gin.H{
 			"title":    "Nowy pacjent",
 			"nav":      getNav(),

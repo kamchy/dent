@@ -1,3 +1,6 @@
+{{ if .curr }}
+<form action={{.formdata.Action}} method={{.formdata.Method}}>
+
 <div class="field">
   <label class="label">Imię</label>
   <div class="control">
@@ -43,12 +46,12 @@
 
 <div class="field is-grouped">
   <div class="control">
-    <button type="submit" class="button is-link" type="submit">Zapisz</button>
-  </div>
-  <div class="control">
-    <button class="button is-link is-light">Anuluj</button>
+    <button type="submit" class="button is-link">Zapisz</button>
   </div>
 </div>
+
+  </form>
+{{end}}
 
 {{ with .err }}
 <div class="notification is-danger">
