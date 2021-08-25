@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	"log"
-	"strings"
 	"time"
 
 	"kamilachyla.com/go/dent/data"
@@ -90,19 +89,20 @@ func (dao SQLiteVisitDao) Add(v data.Visit) (id int, err error) {
 
 	checkErr(err)
 	var note_id int64
-	if strings.Trim(v.Note, " ") != "" {
-		res, err := tx.Exec(ADD_NOTE, v.Note)
-		checkErr(err)
-		note_id, err = res.LastInsertId()
-		checkErr(err)
-	}
+	res, err := tx.Exec(ADD_NOTE, v.Note)
+	checkErr(err)
 
-	res, err := tx.Exec(ADD_VISIT, v.VisitDate, v.PatientId, note_id)
+	note_id, err = res.LastInsertId()
+	checkErr(err)
+	v.NoteId = int(note_id)
+
+	res, err = tx.Exec(ADD_VISIT, v.VisitDate, v.PatientId, v.NoteId)
 	checkErr(err)
 
 	pid, err := res.LastInsertId()
 	checkErr(err)
 	id = int(pid)
+	v.Id = id
 	return
 }
 
