@@ -3,7 +3,7 @@
 
 <div class="field">
   <label class="label">Imię</label>
-  <div class="control">
+  <div class="control has-icons-left">
     <input class="input" type="text" name="name" placeholder="Imię pacjenta" value={{.curr.Name}}>
     <span class="icon is-small is-left">
       <i class="fas fa-user"></i>
@@ -46,7 +46,12 @@
 
 <div class="field is-grouped">
   <div class="control">
-    <button type="submit" class="button is-link">Zapisz</button>
+    <button type="submit" class="button is-link">
+      <span class="icon is-small">
+        <i class="fas fa-save"></i>
+      </span>
+      <span>Zapisz</span>
+    </button>
   </div>
 </div>
 
@@ -54,7 +59,9 @@
 {{end}}
 
 {{ with .err }}
-<div class="notification is-danger">
-  {{.}}
-</div>
+  <div class="block">
+  <div class="notification is-danger">
+    {{.}}
+  </div>
+  </div>
 {{ end }}
