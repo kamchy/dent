@@ -5,17 +5,11 @@
   <span class="icon is-small is-left">
     <i class="fas fa-search" aria-hidden="true"></i>
   </span>
-  <span class="icon is-small is-right" id="search_clear">
-    <i class="fas fa-tooth" aria-hidden="true"></i>
-  </span>
 </p>
 </form>
     
 <script>
   
-  document.getElementById("search_clear").addEventListener("click", (e)=> {
-   document.getElementById('search_input').value = "" 
-  })
   document.getElementById('search_input').addEventListener("input", (e)=>{
     search(e.target.value)
   })
