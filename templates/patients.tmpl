@@ -10,17 +10,20 @@
     </div>
   <div class="section">
       <div class="columns">
-      <div class="column">
+      <div class="column is-one-third">
+        {{ template "search.tmpl" "patients_table" }}
         {{ template "plist.tmpl" .}}
         {{ template "patient_add.tmpl" .}}
       </div>
-      <div class="column">
+      <div class="column is-one-third">
         {{ if .curr }}
         <form action={{.formdata.Action}} method={{.formdata.Method}}>
         {{ template "patient.tmpl" .}}
         </form>
       {{end}}
-
+      </div>
+      <div class="column">
+        Here panel
       </div>
     </div>
   </div>

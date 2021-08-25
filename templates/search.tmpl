@@ -1,0 +1,42 @@
+
+<form action="#">
+<p class="control has-icons-left">
+  <input class="input" name="search_input" id="search_input" type="search" placeholder="Szukaj">
+  <span class="icon is-left">
+    <i class="fas fa-search" aria-hidden="true"></i>
+  </span>
+  <span class="icon is-right" id="search_clear">
+    <i class="fas fa-clear" aria-hidden="true"></i>
+  </span>
+</p>
+</form>
+    
+<script>
+  
+  document.getElementById("search_clear").addEventListener("click", (e)=> {
+   document.getElementById('search_input').value = "" 
+  })
+  document.getElementById('search_input').addEventListener("input", (e)=>{
+    search(e.target.value)
+  })
+
+  function hideAllRows(table) {
+    let tb = table.getElementsByTagName("tbody")[0]
+    Array.from(tb.getElementsByTagName("tr")).map(e => e.style="display:none")
+  }
+
+  function search(value) {
+    let t = document.getElementById("{{.}}")
+    hideAllRows(t)
+    let rows  = Array.from(t.children[1].children)
+    let rowtds = []
+    for (let row of rows) {
+      rowtds = rowtds.concat(Array.from(row.children).slice(1, -2))
+    }
+    let tdwithvalue = rowtds.filter(td => td.innerText.includes(value))
+    tdwithvalue.map(td => console.log(` ${td.innerText} contains "${value}"`))
+    tdwithvalue.map(td=> td.parentNode.style="")
+
+  }
+
+</script>
