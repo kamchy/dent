@@ -1,25 +1,32 @@
+![gabinet](gabinet.png)
+Tiny webapp (local, no cloud) for dentists that stores data in SQLite.
+Written as excercise when learning Go.
+
+# Warnings
+
+**Warning**
+Web inerface is only available in Polish language.
+
+**Warning2**
+Don't use in production.
+
+![usuwanie pacjenta](usuwanie_pacjenta.png)
 # Running
 
 To run this program, execute:
-`go go run main.go  db/sample.db`
+`go run main.go patient_routes.go visit_routes.go routes.go aa.db`
+where `aa.db` is your datbase (SQLite) file.
 
 # Todo
 ## Patients
 Route /patients:
-- button next perhaps at the top?
-- if no persons, be ready to post entered data
-[ok]- if there are persons, always select first one on /patients
 - the table should have pagination for browsing; state should remeber current page 
-- add search field that loads only persons with given string
-- add pane with all visits of selected person (view only)
-- person should have  "visits" link that goes to /patients/:pat/visits
 
 ## Visits
-Route /patients/:pat/visits
- [ok] list of all visits of given patient
  - pagination
- [ok] each line has "show" that displays visit details
- - button "new visit" at the top?
+
+## Dental notation block for patient and single visit
+ - view of [teeth](https://en.wikipedia.org/wiki/Human_tooth) like dentists need and use([PL: system oznaczania zębów](https://pl.wikipedia.org/wiki/Systemy_oznaczania_z%C4%99b%C3%B3w]), [EN: dental notation ](https://en.wikipedia.org/wiki/Dental_notation)
 
 ## Table
 Selection - maybe clickable whole row?
