@@ -5,11 +5,13 @@ create table if not exists patient (
   surname string not null,
   birthdate date not null,
   note_id integer,
+  deleted boolean default false,
   foreign key(note_id) references note(id) 
 );
 
 create table if not exists note (
   id integer primary key,
+  deleted boolean default false,
   text string not null
 );
 
@@ -18,6 +20,7 @@ create table if not exists visit (
   vdatetime datetime not null default CURRENT_TIMESTAMP,
   patient_id integer not null,
   note_id integer,
+  deleted boolean default false,
   foreign key(patient_id) references patient(id),
   foreign key(note_id) references note(id)
 );

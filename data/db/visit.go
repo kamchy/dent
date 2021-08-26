@@ -21,15 +21,17 @@ func GetVisitsDao() (dao data.VisitDao, err error) {
 }
 
 const (
-	GET_VISITS = ` 
+	GET_VISITS_NO_COND = ` 
 		select 
 			v.id, v.vdatetime, v.patient_id, v.note_id, n.text, p.name, p.surname 
 		from 
 			visit v 
 		left join note n on v.note_id=n.id 
-		left join patient p on v.patient_id=p.id`
-	GET_VISIT_BY_ID          = GET_VISITS + " where v.id = ?"
-	GET_VISITS_BY_PATIENT_ID = GET_VISITS + " where v.patient_id = ?"
+		left join patient p on v.patient_id=p.id
+		`
+	GET_VISITS               = GET_VISITS_NO_COND + " where (v.deleted = false) and (p.deleted = false)"
+	GET_VISIT_BY_ID          = GET_VISITS_NO_COND + " where (v.id = ?) and (v.deleted = false)"
+	GET_VISITS_BY_PATIENT_ID = GET_VISITS_NO_COND + " where (v.patient_id = ?) and (v.deleted = false) and (p.deleted = false)"
 	ADD_VISIT                = `
 	insert into visit(vdatetime, patient_id, note_id) 
 	values(?, ?, ?)`
@@ -39,6 +41,7 @@ const (
 	update visit 
 	set vdatetime = ?, patient_id = ?, note_id = ? 
 	where id = ?`
+	DELETE_VISIT = "update visit set deleted = true where id = ?"
 )
 
 func (dao SQLiteVisitDao) GetById(id int) (vis *data.Visit) {
@@ -60,6 +63,7 @@ func (dao SQLiteVisitDao) GetByPatientId(patientId int) []data.Visit {
 
 	return res
 }
+
 func (dao SQLiteVisitDao) GetAll() []data.Visit {
 	res := make([]data.Visit, 0)
 	consumer := func(v data.Visit) {
@@ -143,6 +147,14 @@ func (dao SQLiteVisitDao) UpdateVisit(v data.Visit) error {
 	return nil
 }
 
+func (dao SQLiteVisitDao) Delete(id int) error {
+	db := dao.Db
+	_, err := db.Exec(DELETE_VISIT, id)
+	log.Printf("Deleting visit with id %d, err=%v", id, err)
+	checkErr(err)
+	return err
+
+}
 func readAllVisits(db *sql.DB, cons func(v data.Visit)) {
 	rows, err := db.Query(GET_VISITS)
 	readVisits(rows, err, cons)

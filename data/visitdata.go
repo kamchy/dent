@@ -29,6 +29,7 @@ type VisitDao interface {
 	GetByPatientId(patientId int) []Visit
 	Add(v Visit) (id int, err error)
 	UpdateVisit(v Visit) error
+	Delete(id int) error
 }
 
 const VISIT_DATE_LAYOUT = "2006-01-02 15:04"
@@ -42,8 +43,13 @@ func (v Visit) VisitDateString() string {
 func (v Visit) VisitTimeString() string {
 	return v.VisitDate.Local().Format(VISIT_TIME_ONLY_LAYOUT)
 }
+
 func (v Visit) GetLink() string {
 	return fmt.Sprintf("/patients/%d/visits/%d", v.PatientId, v.Id)
+}
+
+func (v Visit) DeleteLink() string {
+	return fmt.Sprintf("/visits/%d/delete", v.Id)
 }
 
 func (v Visit) From(d time.Time, t time.Time) time.Time {

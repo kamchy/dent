@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -152,5 +153,15 @@ func DefineVisitRoutes(r *gin.Engine) {
 			"formdata": FormData{Action: vis.GetLink(), Method: "POST"},
 			"err":      err,
 		})
+	})
+
+	r.POST("visits/:id/delete", func(c *gin.Context) {
+		v := GetId(c)
+		status := http.StatusFound
+		log.Printf("POST visits/%d/delete", v)
+		if err := visits.Delete(v); err != nil {
+			status = http.StatusGone
+		}
+		c.Redirect(status, "/visits")
 	})
 }

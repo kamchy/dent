@@ -5,6 +5,7 @@
     <th>Nazwisko</th>
     <th>Data</th>
     <th>Pokaż</th>
+    <th>Usuń</th>
   </thead>
   <tbody>
     {{ range $r := .visits}}
@@ -22,6 +23,11 @@
         <td>{{$r.Surname}}</td>
         <td>{{$r.VisitDateString}}</td>
         <td><a href="{{$r.GetLink}}">Pokaż</a></td>
+        <td>
+          <form method="POST" action="{{$r.DeleteLink}}">
+            <button class="delete" type="submit"></button>
+          </form>
+        </td>
       </tr>
     {{end}}
    </tbody>

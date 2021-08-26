@@ -21,6 +21,10 @@ func NewPatient(id int, name string, surname string, birthdate time.Time, note_i
 func (p Patient) GetLink() string {
 	return fmt.Sprintf("/patient/%d", p.Id)
 }
+
+func (p Patient) DeleteLink() string {
+	return fmt.Sprintf("/patient/%d/delete", p.Id)
+}
 func (p Patient) GetVisits() string {
 	return fmt.Sprintf("/patients/%d/visits", p.Id)
 

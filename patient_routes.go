@@ -107,6 +107,16 @@ func DefinePatientRoutes(r *gin.Engine) {
 
 	})
 
+	r.POST("/patient/:id/delete", func(c *gin.Context) {
+		v := GetId(c)
+		log.Printf("DELETING /patient/%d\n", v)
+		status := http.StatusFound
+		if ok := patients.Remove(v); !ok {
+			status = http.StatusGone
+		}
+		c.Redirect(status, "/patients")
+	})
+
 	r.POST("/patient/:id", func(c *gin.Context) {
 		patWithNote, err := BindPatient(c)
 		log.Printf("POSTED /patient/%d: %#v\n", patWithNote.Id, patWithNote)

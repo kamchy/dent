@@ -6,6 +6,7 @@
     <th>Nazwisko</th>
     <th>Dane</th>
     <th>Wizyty</th>
+    <th>Usuń</th>
   </thead>
   <tbody>
     {{ range $r := .pat }}
@@ -23,6 +24,12 @@
         <td>{{$r.Surname}}</td>
         <td><a href="{{$r.GetLink}}">Dane</a></td>
         <td><a href="{{$r.GetVisits}}">Wizyty</a></td>
+        <td>
+          <form method="POST" action="{{$r.DeleteLink}}">
+            <button class="delete" type="submit"></button>
+          </form>
+        </td>
+
       </tr>
     {{end}}
    </tbody>
