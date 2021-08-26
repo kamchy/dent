@@ -3,11 +3,13 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/thinkerou/favicon"
 )
 
 func main() {
 	r := gin.Default()
 	r.Static("assets", "./assets")
+	r.Use(favicon.New("assets/favicon.ico"))
 	r.LoadHTMLGlob("templates/*")
 	DefinePatientRoutes(r)
 	DefineVisitRoutes(r)
