@@ -162,12 +162,12 @@ func readAllVisits(db *sql.DB, cons func(v data.Visit)) {
 
 func readPatientVisits(db *sql.DB, cons func(v data.Visit), pid int) {
 	rows, err := db.Query(GET_VISITS_BY_PATIENT_ID, pid)
-	defer rows.Close()
 	readVisits(rows, err, cons)
 }
 
 /* TODO refactor wiht ReadPersons*/
 func readVisits(rows *sql.Rows, err error, cons func(v data.Visit)) {
+	defer rows.Close()
 	checkErr(err)
 
 	for rows.Next() {
