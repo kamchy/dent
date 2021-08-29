@@ -1,4 +1,4 @@
-package main
+package routes
 
 import (
 	"fmt"
@@ -19,7 +19,7 @@ type FormData struct {
 
 func DefinePatientRoutes(r *gin.Engine) {
 	patients, err := db.GetPatientsDao()
-	exitIfErr(err)
+	ExitIfErr(err)
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{

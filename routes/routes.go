@@ -1,4 +1,4 @@
-package main
+package routes
 
 import (
 	"log"
@@ -23,9 +23,21 @@ func GetId(c *gin.Context) int {
 	return getParamOr(c, "id", -1)
 }
 
-func exitIfErr(err error) {
+func ExitIfErr(err error) {
 	if err != nil {
 		log.Println(err.Error())
 		os.Exit(1)
+	}
+}
+
+type TemplMap struct {
+	Path  string
+	Templ string
+}
+
+func getNav() map[string]TemplMap {
+	return map[string]TemplMap{
+		"Pacjenci": {"/patients", "patients.tmpl"},
+		"Wizyty":   {"/visits", "visits.tmpl"},
 	}
 }

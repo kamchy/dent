@@ -1,4 +1,4 @@
-package main
+package routes
 
 import (
 	"fmt"
@@ -14,9 +14,9 @@ import (
 
 func DefineVisitRoutes(r *gin.Engine) {
 	visits, err := db.GetVisitsDao()
-	exitIfErr(err)
+	ExitIfErr(err)
 	patients, err := db.GetPatientsDao()
-	exitIfErr(err)
+	ExitIfErr(err)
 	/* Displays all visits */
 	r.GET("/visits", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "visits.tmpl", gin.H{

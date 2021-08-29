@@ -4,6 +4,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/thinkerou/favicon"
+	"kamilachyla.com/go/dent/routes"
 )
 
 func main() {
@@ -11,20 +12,8 @@ func main() {
 	r.Static("assets", "./assets")
 	r.Use(favicon.New("assets/favicon.ico"))
 	r.LoadHTMLGlob("templates/*")
-	DefinePatientRoutes(r)
-	DefineVisitRoutes(r)
+	routes.DefinePatientRoutes(r)
+	routes.DefineVisitRoutes(r)
 
 	r.Run() // listen and serve on 0.0.0.0:8080
-}
-
-type TemplMap struct {
-	Path  string
-	Templ string
-}
-
-func getNav() map[string]TemplMap {
-	return map[string]TemplMap{
-		"Pacjenci": {"/patients", "patients.tmpl"},
-		"Wizyty":   {"/visits", "visits.tmpl"},
-	}
 }
