@@ -31,6 +31,7 @@ type StateDao interface {
 }
 
 type ChangeDao interface {
-	ForVisit(visitId int) (states []Change, err error)
-	AllReversed(visitId int) (states []Change, err error)
+	ForVisit(visitId int) (changes []Change, err error)
+	AllReversed(visitId int) (changes []Change, err error)
+	InsertChange(data Change) (change *Change, err error)
 }

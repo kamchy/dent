@@ -35,7 +35,11 @@ func DefineStateRoutes(r *gin.Engine) {
 	r.POST("/api/visits/:id/add", func(c *gin.Context) {
 		ch := data.Change{}
 		c.BindJSON(&ch)
-		c.String(http.StatusOK, "Got change %v", ch)
+		if ch, err := changes.InsertChange(ch); err == nil {
+			c.JSON(http.StatusCreated, ch)
+		} else {
+			c.JSON(http.StatusInternalServerError, fmt.Sprintf("There was error %s", err.Error()))
+		}
 
 	})
 }

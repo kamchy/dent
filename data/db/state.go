@@ -21,17 +21,39 @@ func GetChangeDao() (dao data.ChangeDao, err error) {
 const (
 	QUERY_FOR_VISIT = `
 select c.id, visit_id, patient_id, state_id, tooth_num, tooth_side
-from change c 
+from change c
 left join visit v on c.visit_id = v.id
 where visit_id = ?
 `
 	QUERY_FOR_ALL_REVERSED = `
-select c.id, visit_id, patient_id, state_id, tooth_num, tooth_side
-from change c
-left join visit v on c.visit_id = v.id
-left join patient p on p.id = v.patient_id
-where vdatetime <= (select vdatetime from visit where visit.id = ?)
+with
+	pv(id, patient_id, vdatetime) as (
+		select id, patient_id, vdatetime
+		from visit
+		where visit.id = ?)
+select
+	c.id, c.visit_id, v.patient_id, c.state_id, c.tooth_num, c.tooth_side
+from
+	change c
+left join
+  state s
+on
+	s.id = c.state_id
+left join
+	visit v
+on
+	c.visit_id = v.id
+join
+	pv
+on
+	v.patient_id = pv.patient_id
+where
+	v.vdatetime <= pv.vdatetime
+order by
+	v.vdatetime asc,
+	s.whole asc
 `
+	INSERT_CHANGE = "insert into change(visit_id, state_id, tooth_num, tooth_side) values (?, ?, ?, ?)"
 )
 
 func readChange(rows *sql.Rows) (change *data.Change) {
@@ -71,8 +93,20 @@ func (d SQLiteChangeDao) ForVisit(visitId int) (states []data.Change, err error)
 	return readRows(d.Db, QUERY_FOR_VISIT, visitId)
 
 }
+
 func (d SQLiteChangeDao) AllReversed(visitId int) (states []data.Change, err error) {
 
 	log.Printf("Called state AllReversed with visitId=%d\n", visitId)
 	return readRows(d.Db, QUERY_FOR_ALL_REVERSED, visitId)
+}
+
+func (d SQLiteChangeDao) InsertChange(data data.Change) (change *data.Change, err error) {
+
+	if res, err := d.Db.Exec(INSERT_CHANGE, data.VisitId, data.StateId, data.ToothNum, data.ToothSide); err == nil {
+		if id64, err := res.LastInsertId(); err == nil {
+			data.Id = int(id64)
+		}
+		return &data, err
+	}
+	return nil, err
 }
