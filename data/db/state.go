@@ -36,10 +36,6 @@ select
 from
 	change c
 left join
-  state s
-on
-	s.id = c.state_id
-left join
 	visit v
 on
 	c.visit_id = v.id
@@ -51,7 +47,7 @@ where
 	v.vdatetime <= pv.vdatetime
 order by
 	v.vdatetime asc,
-	s.whole asc
+	c.time asc
 `
 	INSERT_CHANGE = "insert into change(visit_id, state_id, tooth_num, tooth_side) values (?, ?, ?, ?)"
 )
@@ -105,8 +101,9 @@ func (d SQLiteChangeDao) InsertChange(data data.Change) (change *data.Change, er
 	if res, err := d.Db.Exec(INSERT_CHANGE, data.VisitId, data.StateId, data.ToothNum, data.ToothSide); err == nil {
 		if id64, err := res.LastInsertId(); err == nil {
 			data.Id = int(id64)
+		} else {
+			return &data, err
 		}
-		return &data, err
 	}
-	return nil, err
+	return &data, err
 }

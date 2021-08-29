@@ -38,6 +38,7 @@ create table if not exists change (
  state_id int not null,
  tooth_num string,
  tooth_side int,
+ time int not null default CURRENT_TIMESTAMP,
  foreign key(visit_id) references visit(id),
  foreign key(state_id) references state(id)
 );

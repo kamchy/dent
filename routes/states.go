@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"kamilachyla.com/go/dent/data"
@@ -34,8 +35,11 @@ func DefineStateRoutes(r *gin.Engine) {
 
 	r.POST("/api/visits/:id/add", func(c *gin.Context) {
 		ch := data.Change{}
+		vid := GetId(c)
 		c.BindJSON(&ch)
+		ch.VisitId = vid
 		if ch, err := changes.InsertChange(ch); err == nil {
+			log.Printf("POST %s: After insert ch=%v\n", c.Request.URL, ch)
 			c.JSON(http.StatusCreated, ch)
 		} else {
 			c.JSON(http.StatusInternalServerError, fmt.Sprintf("There was error %s", err.Error()))
