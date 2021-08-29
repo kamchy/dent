@@ -14,6 +14,7 @@ func main() {
 	r.LoadHTMLGlob("templates/*")
 	routes.DefinePatientRoutes(r)
 	routes.DefineVisitRoutes(r)
+	routes.DefineStateRoutes(r)
 
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
