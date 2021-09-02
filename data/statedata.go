@@ -25,13 +25,9 @@ func (c Change) String() string {
 	return fmt.Sprintf("Change %d: vis[%d], pat[%d], state[%d], t[%d], side[%d]", c.Id, c.VisitId, c.PatientId, c.StateId, c.ToothNum, c.ToothSide)
 }
 
-type StateDao interface {
-	GetWholeStates() []State
-	GetParialStates() []State
-}
-
 type ChangeDao interface {
 	ForVisit(visitId int) (changes []Change, err error)
 	AllReversed(visitId int) (changes []Change, err error)
 	InsertChange(data Change) (change *Change, err error)
+	GetStates() (states []State, err error)
 }

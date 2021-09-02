@@ -15,16 +15,16 @@
         {{ template "plist.tmpl" .}}
         {{ template "patient_add.tmpl" .}}
       </div>
-      <div class="column is-one-third">
         {{ if .curr }}
-        <form action={{.formdata.Action}} method={{.formdata.Method}}>
-        {{ template "patient.tmpl" .}}
-        </form>
+        <div class="column ">
+          <form action={{.formdata.Action}} method={{.formdata.Method}}>
+          {{ template "patient.tmpl" .}}
+          </form>
+        </div>
+        <div class="column">
+            {{ template "diagram.tmpl" .states }}
+        </div>
       {{end}}
-      </div>
-      <div class="column">
-        Here panel
-      </div>
     </div>
   </div>
 {{ end }}

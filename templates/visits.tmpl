@@ -8,25 +8,29 @@
       {{ if not .curr }}
       Lista wizyt 
       {{ else }}
-      {{.curr.Name}} {{.curr.Surname}}
+        <a href="{{.curr.GetLink}}">{{.curr.Name}} {{.curr.Surname}}</a>
       {{end}}
       </p>
   </div>
   <div class="section">
     <div class="columns">
-        <div class="column is-one-third">
+        <div class="column">
               <!--{{ template "search.tmpl" "visits_table" }}-->
               {{ template "vlist.tmpl" .}}
               {{ template "visit_add.tmpl" .}}
         </div>
-        <div class="column is-one-third">
         {{ if .currvis }}
+        <div class="column">
           <form action={{.formdata.Action}} 
             method={{.formdata.Method}}>
           {{ template "visit.tmpl" .}}
           </form>
-        {{end}}
         </div>
+        <div class="column">
+          {{ template "diagram.tmpl" .states }}
+        </div>
+        {{end}}
+
       </div>
     </div>
 {{ end }}

@@ -50,6 +50,8 @@ order by
 	c.time asc
 `
 	INSERT_CHANGE = "insert into change(visit_id, state_id, tooth_num, tooth_side) values (?, ?, ?, ?)"
+
+	QUERY_STATES = "select name, whole from state"
 )
 
 func readChange(rows *sql.Rows) (change *data.Change) {
@@ -106,4 +108,23 @@ func (d SQLiteChangeDao) InsertChange(data data.Change) (change *data.Change, er
 		}
 	}
 	return &data, err
+}
+
+func (d SQLiteChangeDao) GetStates() (states []data.State, err error) {
+	rows, err := d.Db.Query(QUERY_STATES)
+	if err != nil {
+		return nil, err
+	}
+
+	var id int
+	var name string
+	var val bool
+
+	states = make([]data.State, 0)
+	for rows.Next() {
+		rows.Scan(&id, &name, &val)
+		states = append(states, data.State{Id: id, Name: name, Whole: val})
+	}
+	return states, nil
+
 }

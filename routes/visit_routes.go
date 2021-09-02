@@ -17,6 +17,8 @@ func DefineVisitRoutes(r *gin.Engine) {
 	ExitIfErr(err)
 	patients, err := db.GetPatientsDao()
 	ExitIfErr(err)
+	changes, err := db.GetChangeDao()
+	ExitIfErr(err)
 	/* Displays all visits */
 	r.GET("/visits", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "visits.tmpl", gin.H{
@@ -54,6 +56,7 @@ func DefineVisitRoutes(r *gin.Engine) {
 		p := GetId(c)
 		v := GetVId(c)
 		vis := visits.GetById(v)
+		states, err := changes.GetStates()
 		c.HTML(http.StatusOK, "visits.tmpl", gin.H{
 			"title":    "Gabinet",
 			"nav":      getNav(),
@@ -61,6 +64,8 @@ func DefineVisitRoutes(r *gin.Engine) {
 			"currvis":  vis,
 			"curr":     patients.GetById(p),
 			"formdata": FormData{Action: vis.GetLink(), Method: "POST"},
+			"states":   states,
+			"err":      err,
 		})
 	})
 
