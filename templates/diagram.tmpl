@@ -1,12 +1,16 @@
 <style type="text/css">
       canvas { border: 1px solid black; }
   </style>
-<div id="diag"></img>
+<div id="diag">
   <div id="canvas_diag"></div>
-  <div id="log"></div>
+  <div id="canvas_states"></div>
+  </div>
+  {{ $states := . }}
   <script type="module">
-    import {App} from "/assets/diagram.js"
-    var app = new App("canvas_diag", 800, 600, {{.}})
+    import {App} from "/assets/diagram.js";
+    var app = new App( 
+    {name: "canvas_diag", wi: 800, hi: 250}, 
+    {name: "canvas_states", wi: 800, hi: 300, states: {{$states}}});
     
   </script>
 

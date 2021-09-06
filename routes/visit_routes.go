@@ -56,15 +56,16 @@ func DefineVisitRoutes(r *gin.Engine) {
 		p := GetId(c)
 		v := GetVId(c)
 		vis := visits.GetById(v)
-		states, err := changes.GetStates()
+		sts, err := changes.GetStates()
+		log.Printf("GET visit, states: %v\n", sts)
 		c.HTML(http.StatusOK, "visits.tmpl", gin.H{
-			"title":    "Gabinet",
+			"title":    "Gabinet - wizyta",
 			"nav":      getNav(),
 			"visits":   visits.GetByPatientId(p),
 			"currvis":  vis,
 			"curr":     patients.GetById(p),
 			"formdata": FormData{Action: vis.GetLink(), Method: "POST"},
-			"states":   states,
+			"states":   sts,
 			"err":      err,
 		})
 	})
@@ -146,8 +147,13 @@ func DefineVisitRoutes(r *gin.Engine) {
 			err = visits.UpdateVisit(vis)
 		}
 
-		v := vis.Id
+		v := GetVId(c)
 		p := GetId(c)
+
+		var sts []data.State
+		if err == nil {
+			sts, err = changes.GetStates()
+		}
 
 		c.HTML(http.StatusOK, "visits.tmpl", gin.H{
 			"title":    "Nowa wizyta",
@@ -156,6 +162,7 @@ func DefineVisitRoutes(r *gin.Engine) {
 			"currvis":  visits.GetById(v),
 			"curr":     patients.GetById(p),
 			"formdata": FormData{Action: vis.GetLink(), Method: "POST"},
+			"states":   sts,
 			"err":      err,
 		})
 	})
