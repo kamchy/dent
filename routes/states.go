@@ -37,6 +37,7 @@ func DefineStateRoutes(r *gin.Engine) {
 		ch := data.Change{}
 		vid := GetId(c)
 		c.BindJSON(&ch)
+		log.Printf("Post a change in states.go for visit %d: %v\n", vid, ch)
 		ch.VisitId = vid
 		if ch, err := changes.InsertChange(ch); err == nil {
 			log.Printf("POST %s: After insert ch=%v\n", c.Request.URL, ch)

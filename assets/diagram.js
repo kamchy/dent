@@ -1,3 +1,5 @@
+class Web {
+}
 class Tooth {
 
   constructor(num, col, row, iskid) {
@@ -9,7 +11,7 @@ class Tooth {
     this.isSelected = false
     this.init_sides()
   }
-  
+
   init_sides() {
     this.sides = [0, 0, 0, 0, 0]
   }
@@ -25,10 +27,10 @@ function range(a, b) {
   let res = new Array()
   let fn =  (a <= b) ? Array.prototype.push : Array.prototype.unshift
   for (let i = Math.min(a, b); i <= Math.max(a, b); i++) {
-    fn.apply(res, [i]) 
+    fn.apply(res, [i])
   }
   return res
-  
+
 
 }
 class Teeth {
@@ -37,7 +39,7 @@ class Teeth {
     let adult_down =  this._createTeeth(range(48, 41).concat(range(31, 38)), 3, false)
     let kid_up =  this._createTeeth(range(55, 51).concat(range(61, 65)), 1, true)
     let kid_down = this._createTeeth(range(85, 81).concat(range(71, 75)), 2, true)
-    
+
     this.all = adult_up.concat(adult_down).concat(kid_up).concat(kid_down)
     this.selected = undefined
 
@@ -54,12 +56,11 @@ class Teeth {
     }
     this.selected.state = s.Id
     eve("state", this, {t: this.selected})
-    return this.selected
   }
 
   _createTeeth(range, rowidx, isKid) {
     let ts = new Array()
-    range.forEach((v, colidx,_) => 
+    range.forEach((v, colidx,_) =>
       ts.push(new Tooth(v, isKid ? colidx + 3 : colidx, rowidx, isKid))
     )
     return ts
@@ -76,7 +77,7 @@ class Teeth {
     this.selected = t
     t.isSelected = true
     forUpdate.push(t)
-    return forUpdate
+    eve("select", this, forUpdate)
   }
 
 
@@ -89,57 +90,78 @@ class TeethGrid {
     this.cell = (Math.max(wi, hi) / 16) - 2 * this.space
     this.colors =  {
       norm : {
-        kid: {fill: "#fffbeb", stroke: "#48c774"},
-        adult:{fill: "#edf6fc", stroke: "#3298dc"} 
+        kid: {fill: "#fffbeb", stroke: "#48c774", strokewidth: 1},
+        adult:{fill: "#edf6fc", stroke: "#3298dc", strokewidth: 1}
       },
 
       sel : {
-        kid: {fill: "#feecf0", stroke: "#f14668"},
-        adult:{fill: "#feecf0", stroke: "#f14668"} 
+        kid: {fill: "#feecf0", stroke: "#f14668", strokewidth: 4},
+        adult:{fill: "#feecf0", stroke: "#f14668", strokewidth: 4}
       }
     }
 
     this.api = api
     this.teethToGraphics = new Map()
-    eve.on("state", 
-      (o, e) => {
-        console.log("eve handler: ", o, e)
+
+    eve.on("state",
+      (o) => {
+        console.log("eve handler state: ", o)
         this.redraw(o.t)
+      })
+
+    eve.on("select",
+      (o) => {
+        console.log("eve handler select", o)
+        o.forEach(t => this.redraw(t))
       })
   }
 
   create(teeth) {
     for (let t of teeth.all) {
-      this.teethToGraphics.set(t, this.create_graphics(t))
+      let gr = this.create_graphics(t)
+      this.teethToGraphics.set(t, gr)
       this.redraw(t)
+      gr.hover(()=>{
+        gr.attr("stroke", "#f14668")
+      }, ()=> {
+        let {stroke} = this.getFillStroke(t)
+        gr.attr("stroke", stroke)
+      }, null, null)
     }
+  }
+
+  getFillStroke(t) {
+    let selcols = t.isSelected ? this.colors.sel : this.colors.norm
+    let cols = t.isKid ? selcols.kid : selcols.adult
+    let fill = t.state === 0 ? cols.fill : this.api.getColor(t.state)
+    return {fill, stroke: cols.stroke, strokewidth: cols.strokewidth}
+  }
+
+
+  setAttrs(gr, {fill, stroke, strokewidth}) {
+    gr.attr("fill", fill)
+    gr.attr("stroke", stroke)
+    gr.attr("stroke-width", strokewidth)
   }
 
   redraw(t) {
     console.log(`redraw ${t}`)
-    let selcols = t.isSelected ? this.colors.sel : this.colors.norm
-    let width = t.isSelected ? 4 : 1
-    let cols = t.isKid ? selcols.kid : selcols.adult
-    let toothrect = this.teethToGraphics.get(t)
-    toothrect.attr("fill",  t.state === 0 ? cols.fill : this.api.getColor(t.state)) 
-    toothrect.attr("stroke", cols.stroke)
-    toothrect.attr("stroke-width", width)
+    this.setAttrs(this.teethToGraphics.get(t), this.getFillStroke(t))
 
   }
 
   create_graphics(t) {
     let x = this.space + t.col * (this.space + this.cell)
     let y = this.space + t.row * (this.space + this.cell)
-    var toothrect = this.r.rect(x, y, this.cell, this.cell, 5)
-    
+    var toothrect = this.r.rect(x, y, this.cell, this.cell, 10)
+
     let toothNum = this.r.text(x + this.cell/2, y + this.cell/ 2, t.num)
     toothNum.attr("fill", "#222")
 
 
     toothrect.click(() => {
       console.log("in click for tooth ", t)
-      let forUpdate = this.api.select(t)
-      forUpdate.forEach(t => this.redraw(t))
+      this.api.select(t)
     })
 
     console.log(`created graphics ${t} at ${x}, ${y}`)
@@ -153,7 +175,7 @@ class States{
     this.states = s
     this.colors = new Map(
       s.map(
-        (el, idx) => 
+        (el, idx) =>
           [el.Id, Raphael.hsl2rgb(idx * (360/this.states.length), 50, 60)]))
     this.colors.set(0, "white")
     console.log("States created with s = ", s , " and colors ", this.colors)
@@ -209,11 +231,11 @@ class StatesGrid{
     let cell_height = 50
     let rect_width = 30
     let rect_height = 30
-    
-  
+
+
     let states = stateModel.states
     let positions = get_n(pos_iter(cell_x_count, this.width, cell_height), states.length)
-    
+
     for (let i = 0; i < states.length; i++) {
       let [x, y] = positions[i]
       let s = states[i]
@@ -223,14 +245,14 @@ class StatesGrid{
       bg.attr("fill", "white")
       bg.attr("stroke", "none")
       let rect = this.r.rect(
-        x + 0.5 * rect_width, 
-        y + (cell_height - rect_height)/2, 
-        rect_width, 
+        x + 0.5 * rect_width,
+        y + (cell_height - rect_height)/2,
+        rect_width,
         rect_height)
       let t =  this.r.text(
-        x + 1.8 * rect_width, 
-        y + (cell_height)/2, 
-        //y + rect_height, 
+        x + 1.8 * rect_width,
+        y + (cell_height)/2,
+        //y + rect_height,
         s.Name)
       t.attr("text-anchor", "start")
       t.attr("font-size", 12)
@@ -249,7 +271,7 @@ class StatesGrid{
           bg.attr("fill", "#ddd")
         }, ()=> {
           bg.attr("fill", "white")
-        }, null, null) 
+        }, null, null)
       )
       y += cell_height
       this.stateToGraphics.set(s, stateGr)
