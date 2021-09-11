@@ -173,20 +173,28 @@ class TeethGrid {
 class States{
   constructor(s) {
     this.states = s
-    this.colors = new Map(
-      s.map(
-        (el, idx) =>
-          [el.Id, Raphael.hsl2rgb(idx * (360/this.states.length), 50, 60)]))
-    this.colors.set(0, "white")
+    this.idToSttae = new Map( s.map(el => [el.Id, el]))
     console.log("States created with s = ", s , " and colors ", this.colors)
 
     this.api = {
-      getColor: (s) => this._getColors(s)
+      getColor: (s) => this._getColors(s),
+      getPath: (s) => this._getPath(s)
     }
   }
+  _getPath(s) {
+    if (!this.idToState.has(s)) {
+      // rect by default
+      return "M0,0h100v100h-100Z"
+    }
+    return this.idToState.get(s).Svgpath
 
+  }
   _getColors(s) {
-    return this.colors.get(s)
+    if (!this.idToState.has(s)) {
+      // pink color by default
+      return "pink"
+    }
+    return this.idToState.get(s).Color
   }
 }
 
@@ -244,15 +252,16 @@ class StatesGrid{
       let bg =this.r.rect(x, y, cell_width, cell_height)
       bg.attr("fill", "white")
       bg.attr("stroke", "none")
-      let rect = this.r.rect(
+
+      this.r.translate(
         x + 0.5 * rect_width,
-        y + (cell_height - rect_height)/2,
-        rect_width,
-        rect_height)
+        y + (cell_height - rect_height)/2)
+      this.r.scale(rect_width/100, rect_height/100)
+      let rect = this.r.path(this.api.getPath(s.Id))
+      
       let t =  this.r.text(
         x + 1.8 * rect_width,
         y + (cell_height)/2,
-        //y + rect_height,
         s.Name)
       t.attr("text-anchor", "start")
       t.attr("font-size", 12)

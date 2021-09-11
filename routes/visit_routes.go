@@ -56,6 +56,10 @@ func DefineVisitRoutes(r *gin.Engine) {
 		p := GetId(c)
 		v := GetVId(c)
 		vis := visits.GetById(v)
+		action := ""
+		if vis != nil {
+			action = vis.GetLink()
+		}
 		sts, err := changes.GetStates()
 		log.Printf("GET visit, states: %v\n", sts)
 		c.HTML(http.StatusOK, "visits.tmpl", gin.H{
@@ -64,7 +68,7 @@ func DefineVisitRoutes(r *gin.Engine) {
 			"visits":   visits.GetByPatientId(p),
 			"currvis":  vis,
 			"curr":     patients.GetById(p),
-			"formdata": FormData{Action: vis.GetLink(), Method: "POST"},
+			"formdata": FormData{Action: action, Method: "POST"},
 			"states":   sts,
 			"err":      err,
 		})

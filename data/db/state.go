@@ -51,7 +51,7 @@ order by
 `
 	INSERT_CHANGE = "insert into change(visit_id, state_id, tooth_num, tooth_side) values (?, ?, ?, ?)"
 
-	QUERY_STATES = "select id, name, whole from state"
+	QUERY_STATES = "select id, name, whole, color, svgpath from state"
 )
 
 func readChange(rows *sql.Rows) (change *data.Change) {
@@ -119,11 +119,13 @@ func (d SQLiteChangeDao) GetStates() (states []data.State, err error) {
 	var id int
 	var name string
 	var val bool
+	var color string
+	var svgpath string
 
 	states = make([]data.State, 0)
 	for rows.Next() {
-		rows.Scan(&id, &name, &val)
-		states = append(states, data.State{Id: id, Name: name, Whole: val})
+		rows.Scan(&id, &name, &val, &color, &svgpath)
+		states = append(states, data.State{Id: id, Name: name, Whole: val, Color: color, Svgpath: svgpath})
 	}
 	log.Printf("SQLiteChangeDao: GetStates : %v\n", states)
 	return states, nil

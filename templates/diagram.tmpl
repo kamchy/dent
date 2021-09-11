@@ -1,16 +1,23 @@
 <style type="text/css">
-      canvas { border: 1px solid black; }
+      canvas { border: 1px solid "black"; }
   </style>
 <div id="diag">
   <div id="canvas_diag"></div>
   <div id="canvas_states"></div>
   </div>
   {{ $states := . }}
+  <!--<script type="module">-->
+    <!--import {App} from "/assets/diagram.js";-->
+    <!--var app = new App( -->
+    <!--{name: "canvas_diag", wi: 800, hi: 250}, -->
+    <!--{name: "canvas_states", wi: 800, hi: 300, states: {{$states}}});-->
+  <!--</script>-->
   <script type="module">
-    import {App} from "/assets/diagram.js";
+    import {App} from "/assets/diagram_with_parts.js";
     var app = new App( 
-    {name: "canvas_diag", wi: 800, hi: 250}, 
-    {name: "canvas_states", wi: 800, hi: 300, states: {{$states}}});
-    
+    {name: "#canvas_diag", wi: 800, hi: 400, states: {{$states}}},
+    {name: "#canvas_states", wi: 800, hi: 300, states: {{$states}}}
+    );
+    console.log("app created")
   </script>
 

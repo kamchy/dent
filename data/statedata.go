@@ -3,9 +3,11 @@ package data
 import "fmt"
 
 type State struct {
-	Id    int
-	Name  string
-	Whole bool
+	Id      int
+	Name    string
+	Whole   bool
+	Color   string
+	Svgpath string
 }
 
 type Change struct {
