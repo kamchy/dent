@@ -1,14 +1,3 @@
-function data(wi, hi, n_adult, n_kid, textsize) {
-  let canvas_margin = 10
-  let rowcount = 4
-  let spacex = (wi - canvas_margin*2)/n_adult
-  let spacey = (hi - canvas_margin*2)/rowcount
-  let margin = 3
-  let rectx = spacex - margin
-  let recty = spacey - margin
-  return { n_adult, n_kid, spacex, spacey, margin, canvas_margin, rectx, recty, textsize}
-}
-
 function mk_range(f, t) {
   let arr = []
   let minv = Math.min(f, t)
@@ -106,7 +95,7 @@ class ToothDrawer {
   constructor ({name, wi, hi, states}) {
     console.log(`Name: ${name}, states`, states)
     this.draw = SVG().addTo(name).size(wi, hi)
-    this.d = data(wi, hi, 16, 10, text_size(this.draw, {example: "12", fontsize: 12}))
+    this.d = this.data(wi, hi, 16, 10, text_size(this.draw, {example: "12", fontsize: 12}))
     this.draw.translate(this.d.canvas_margin, 0)
     this.states = new States(states)
     this.teeth = new Map()
@@ -117,6 +106,17 @@ class ToothDrawer {
       {type: "kid", ranges: [[85, 81], [71, 75]]},
       {type: "adult", ranges: [[48, 41], [31, 38]]}]
     row_data.forEach((rd, idx) => this.draw_row(idx, rd))
+  }
+
+  data(wi, hi, n_adult, n_kid, textsize) {
+    let canvas_margin = 10
+    let rowcount = 4
+    let spacex = (wi - canvas_margin*2)/n_adult
+    let spacey = (hi - canvas_margin*2)/rowcount
+    let margin = 3
+    let rectx = spacex - margin
+    let recty = spacey - margin
+    return { n_adult, n_kid, spacex, spacey, margin, canvas_margin, rectx, recty, textsize}
   }
 
   draw_row(idx, rd) {
@@ -139,9 +139,21 @@ class ToothDrawer {
     })
     return g
   }
+
   onclick(v) {
-    return (e) => console.log(`ONCLICK: clicked ${v}`, e)
+    return (e) => this.updateState(v)  
   }
+
+  updateState(v) {
+    let switcher = this.teeth.get(v.toothnum)
+    if (v.i !== undefined) {
+      switcher.updatePart(v.i)
+    } else {
+      switcher.updateWhole()
+    }
+
+  }
+
   tooth(g, toothnum, idx, attr) {
     let d = this.d
     let tdx = d.textsize.tdx/2
@@ -157,11 +169,6 @@ class ToothDrawer {
       function(){
          this.attr({fill: "Snow"})
       })
-    bg.on("click",
-      function(){
-         this.attr({fill: "Plum"})
-        this.fire("statechange", {toothnum}) 
-      })
 
 
 
@@ -176,41 +183,32 @@ class ToothDrawer {
     let c = elems.circle(Math.min(d.rectx, d.recty) - tdy)
       .attr(attr)
       .move(tdy/2, 0)
-      .click(this.onclick({toothnum})) 
+      .hide()
       
-    let parts = this.mk_parts(elems, d.rectx, d.recty - tdy*3).hide()
-    let [a, b] = (Math.random() < 0.5 ? [c, parts] : [parts, c])
-    a.show()
-    b.hide()
-    bg.on("statechange", function(e) {
-      console.log("parts changed", e.detail)
-    })
+    let parts = this.mk_parts(elems, d.rectx, d.recty - tdy*3)
 
+    bg.on("click", this.onclick({toothnum, parts}))
 
     return new Map([["circle", c], ["parts", parts]])
 
   }
 
   mk_parts(tg, wi, hi) {
+    let toothnum = tg.parent().data("id")
     let [v5, v6, v7, v8] = [[wi/3, hi/3], [2*wi/3, hi/3], [2*wi/3, 2*hi/3], [wi/3, 2*hi/3]]
     let [v1, v2, v3, v4] = [[0, 0], [wi, 0], [wi, hi], [0, hi]]
+    let polygons_vertices = [[v1, v5, v8, v4], [v1, v2, v6, v5], [v2, v3, v7, v6], [v3, v4, v8, v7], [v5, v6, v7, v8]]
     let ps = tg.group()
-    ps.polygon().plot([v1, v5, v8, v4])
-    ps.polygon().plot([v1, v2, v6, v5])
-    ps.polygon().plot([v2, v3, v7, v6])
-    ps.polygon().plot([v3, v4, v8, v7])
-    ps.polygon().plot([v5, v6, v7, v8])
-    let tgid = tg.parent().data("id")
-
-    ps.each (function(i, _){
-      this.click((e) => {
-        this.fire("statechange", {toothnum: tgid, part: i})
-      })
-
-
-      this.stroke({color: "SlateGray", width: 2, linecap: "round", linejoin: "round"}).fill({color: "white"})
+    polygons_vertices.forEach((pv, i) => {
+      ps.polygon().plot(pv)
+        .on("click", this.onclick({toothnum, i}))
+        .stroke({
+          color: "SlateGray", 
+          width: 2, 
+          linecap: "round", 
+          linejoin: "round"}
+      ).fill({color: "white"})
     })
-
 
     return ps
   }
@@ -223,40 +221,43 @@ class ToothDrawer {
 
 }
 
-function Switcher(states, t) {
-  this.t = t
-  this.states = states
-  this.stateIdx = 0
-  this.partscount = 5
-  this.partsIdx = []
-  for (let i = 0; i < this.partscount; i++) {
-    this.partsIdx.push(0)
+class Switcher{
+  constructor (states, t) {
+    this.t = t
+    this.states = states
+    this.stateIdx = 0
+    this.partscount = 5
+    this.partsIdx = []
+    for (let i = 0; i < this.partscount; i++) {
+      this.partsIdx.push(0)
+    }
+    console.log("Switcher states and t", states, t)
+    this.c = this.t.get("circle")
+    this.p = this.t.get("parts")
   }
-  console.log("Switcher states and t", states, t)
-  //e.detail has toothnum and part
-  for (let el of t.values()) {
-    console.log("el", el)
-    el.on("statechange",(e) => {
-      console.log("handler fired for statechange with detail", e.detail)
-      let d = e.detail
-      let c = this.t.get("circle")
-      let p = this.t.get("parts")
 
-
-      if (d.part === undefined) {
-        // global
-        this.stateIdx = (this.stateIdx + 1) % this.states.whole.length
-        c.fill({color: this.states.whole[this.stateIdx]})
-        p.hide()
-        c.show()
-      } else {
-        let nextIdx = (this.partsIdx[d.part] + 1) % this.partsCount
-        this.partsIdx[d.part] = nextIdx 
-        p[d.part].attr({fill: this.states.parts[nextIdx]})
-        p.show()
-        c.hide()
-      }
-    })
+  updateWhole() {
+    this.stateIdx = (this.stateIdx + 1) % this.states.whole.length
+    let s = this.states.whole[this.stateIdx]
+    if (s.Id !== 0) {
+    this.c = this.c.replace(this.c.parent().path(s.Svgpath).fill({color: "#777"}).stroke({color: "black"}).scale(0.5, 0, 0).move(4, 0))
+    this.p.hide()
+    this.c.show()
+    } else {
+    this.p.show()
+    this.c.hide()
+    }
   }
+
+  updatePart(partid) {
+    let nextIdx = (this.partsIdx[partid] + 1) % this.states.part.length
+    this.partsIdx[partid] = nextIdx 
+    let s = this.states.part[nextIdx]
+    console.log("part update: ", nextIdx, this.states.part, s)
+    this.p.get(partid).attr({fill: s.Color})
+    this.p.show()
+    this.c.hide()
+  }
+  
 
 }
