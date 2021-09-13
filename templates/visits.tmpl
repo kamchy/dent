@@ -20,14 +20,11 @@
               {{ template "visit_add.tmpl" .}}
         </div>
         {{ if .currvis }}
-        <div class="column">
-          <form action={{.formdata.Action}} 
-            method={{.formdata.Method}}>
+        <div class="column foo">
           {{ template "visit.tmpl" .}}
-          </form>
         </div>
-        <div class="column">
-          {{ template "diagram.tmpl" .states }}
+        <div class="column foo2">
+          {{ template "diagram.tmpl" . }}
         </div>
         {{end}}
 

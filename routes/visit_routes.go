@@ -52,28 +52,6 @@ func DefineVisitRoutes(r *gin.Engine) {
 		})
 	})
 
-	r.GET("patients/:id/visits/:vid", func(c *gin.Context) {
-		p := GetId(c)
-		v := GetVId(c)
-		vis := visits.GetById(v)
-		action := ""
-		if vis != nil {
-			action = vis.GetLink()
-		}
-		sts, err := changes.GetStates()
-		log.Printf("GET visit, states: %v\n", sts)
-		c.HTML(http.StatusOK, "visits.tmpl", gin.H{
-			"title":    "Gabinet - wizyta",
-			"nav":      getNav(),
-			"visits":   visits.GetByPatientId(p),
-			"currvis":  vis,
-			"curr":     patients.GetById(p),
-			"formdata": FormData{Action: action, Method: "POST"},
-			"states":   sts,
-			"err":      err,
-		})
-	})
-
 	r.GET("patients/:id/visits/new", func(c *gin.Context) {
 		p := GetId(c)
 		pat := patients.GetById(p)
@@ -145,32 +123,6 @@ func DefineVisitRoutes(r *gin.Engine) {
 		})
 	})
 
-	r.POST("patients/:id/visits/:vid", func(c *gin.Context) {
-		vis, err := BindVisit(c)
-		if err == nil {
-			err = visits.UpdateVisit(vis)
-		}
-
-		v := GetVId(c)
-		p := GetId(c)
-
-		var sts []data.State
-		if err == nil {
-			sts, err = changes.GetStates()
-		}
-
-		c.HTML(http.StatusOK, "visits.tmpl", gin.H{
-			"title":    "Nowa wizyta",
-			"nav":      getNav(),
-			"visits":   visits.GetByPatientId(p),
-			"currvis":  visits.GetById(v),
-			"curr":     patients.GetById(p),
-			"formdata": FormData{Action: vis.GetLink(), Method: "POST"},
-			"states":   sts,
-			"err":      err,
-		})
-	})
-
 	r.POST("visits/:id/delete", func(c *gin.Context) {
 		v := GetId(c)
 		status := http.StatusFound
@@ -180,4 +132,44 @@ func DefineVisitRoutes(r *gin.Engine) {
 		}
 		c.Redirect(status, "/visits")
 	})
+
+	var respondWithVisitData = func(c *gin.Context, vis *data.Visit) {
+		v := GetVId(c)
+		p := GetId(c)
+
+		var sts []data.State
+		if err == nil {
+			sts, err = changes.GetStates()
+		}
+		var chs []data.Change
+		chs, err = changes.AllReversed(v)
+
+		c.HTML(http.StatusOK, "visits.tmpl", gin.H{
+			"title":    "Wizyta",
+			"nav":      getNav(),
+			"visits":   visits.GetByPatientId(p),
+			"currvis":  visits.GetById(v),
+			"curr":     patients.GetById(p),
+			"formdata": FormData{Action: vis.GetLink(), Method: "POST"},
+			"states":   sts,
+			"changes":  chs,
+			"err":      err,
+			"pid":      p,
+			"vid":      v,
+		})
+	}
+	r.GET("patients/:id/visits/:vid", func(c *gin.Context) {
+		v := GetVId(c)
+		vis := visits.GetById(v)
+		respondWithVisitData(c, vis)
+	})
+
+	r.POST("patients/:id/visits/:vid", func(c *gin.Context) {
+		vis, err := BindVisit(c)
+		if err == nil {
+			err = visits.UpdateVisit(vis)
+		}
+		respondWithVisitData(c, &vis)
+	})
+
 }

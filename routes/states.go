@@ -14,6 +14,8 @@ import (
 func DefineStateRoutes(r *gin.Engine) {
 	changes, err := db.GetChangeDao()
 	ExitIfErr(err)
+	visits, err := db.GetVisitsDao()
+	ExitIfErr(err)
 
 	r.GET("/api/visits/:id/visitchanges", func(c *gin.Context) {
 		id := GetId(c)
@@ -36,6 +38,10 @@ func DefineStateRoutes(r *gin.Engine) {
 	r.POST("/api/visits/:id/add", func(c *gin.Context) {
 		ch := data.Change{}
 		vid := GetId(c)
+		if visits.GetById(vid) == nil {
+			c.JSON(http.StatusNotFound, fmt.Sprintf("Visit wiht Id %d does not exist", vid))
+			return
+		}
 		c.BindJSON(&ch)
 		log.Printf("Post a change in states.go for visit %d: %v\n", vid, ch)
 		ch.VisitId = vid

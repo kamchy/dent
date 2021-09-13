@@ -1,3 +1,5 @@
+import { createMyEvents  } from "./myevents.js"
+
 function mk_range(f, t) {
   let arr = []
   let minv = Math.min(f, t)
@@ -45,8 +47,10 @@ class States {
 }
 export class App {
   constructor (data) {
-    this.tooth_drawer = new ToothDrawer(data)
+    this.es = createMyEvents()
+    this.tooth_drawer = new ToothDrawer(data, this.es)
     this.states_drawer = new StatesDrawer(data)
+    this.sender = new Sender(data.pid, data.vid, this.es)
   }
 }
 
@@ -92,8 +96,9 @@ class StatesDrawer {
 }
 
 class ToothDrawer {
-  constructor ({name, wi, hi, states}) {
-    console.log(`Name: ${name}, states`, states)
+  constructor ({name, wi, hi, states, changes}, es) {
+    this.es = es
+    console.log(`Name: ${name}, states`, states, changes)
     this.draw = SVG().addTo(name).size(wi, hi)
     this.d = this.data(wi, hi, 16, 10, text_size(this.draw, {example: "12", fontsize: 12}))
     this.draw.translate(this.d.canvas_margin, 0)
@@ -145,12 +150,18 @@ class ToothDrawer {
   }
 
   updateState(v) {
-    let switcher = this.teeth.get(v.toothnum)
-    if (v.i !== undefined) {
-      switcher.updatePart(v.i)
+    let toothside = v.i
+    let toothnum = v.toothnum
+    let switcher = this.teeth.get(toothnum)
+    let stateid
+    if (toothside !== undefined) {
+      stateid = switcher.updatePart(toothside)
     } else {
-      switcher.updateWhole()
+      stateid = switcher.updateWhole()
     }
+
+    this.es.emit("update", 
+      {toothnum, stateid, toothside})
 
   }
 
@@ -247,6 +258,7 @@ class Switcher{
     this.p.show()
     this.c.hide()
     }
+    return s.Id
   }
 
   updatePart(partid) {
@@ -257,7 +269,37 @@ class Switcher{
     this.p.get(partid).attr({fill: s.Color})
     this.p.show()
     this.c.hide()
+    return s.Id
   }
-  
+}
 
+class Sender {
+  constructor(pid, vid, es) {
+    this.pid = pid
+    this.vid = vid
+    console.log(`Sender constructor: pid= ${this.pid} vid=${this.vid}`)
+    this.es = es
+    es.on("update", (data)=>this.sendUpdate({vid: this.vid, pid: this.pid, ...data }))
+  }
+  sendUpdate(data) {
+    console.log("sendUpdate: data = ", data);
+    const {toothnum, stateid, toothside, vid, pid} = data;
+    (async () => {
+  const rawResponse = await fetch(`/api/visits/${vid}/add`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      VisitId: vid, 
+      PatientId: pid,
+      StateId: stateid,
+      ToothNum: toothnum,
+      Toothside: toothside})
+  });
+  const content = await rawResponse.json();
+  console.log("Response from FETCH: ", content);
+})();
+  }
 }

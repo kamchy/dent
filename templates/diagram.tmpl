@@ -5,11 +5,17 @@
   <div id="canvas_diag"></div>
   <div id="canvas_states"></div>
   </div>
-  {{ $states := . }}
+  {{ $states := .states}}
+  {{ $changes:= .changes}}
+  {{ $vid:= .vid}}
+  {{ $pid:= .pid}}
+  <p>
+  Data from server (dot) is {{.}}
+  </p>
   <script type="module">
     import {App} from "/assets/diagram_with_parts.js";
     var app = new App( 
-    {name: "#canvas_diag", wi: 800, hi: 400, states: {{$states}}},
+    {name: "#canvas_diag", wi: 800, hi: 400, states: {{$states}}, changes: {{$changes}}, vid: {{$vid}}, pid: {{$pid}}},
     {name: "#canvas_states", wi: 800, hi: 300, states: {{$states}}}
     );
   </script>

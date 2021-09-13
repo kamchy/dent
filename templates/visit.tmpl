@@ -1,4 +1,5 @@
 {{ if .currvis }}
+<!-- before form visit.tmpl curvis -->
 <form action={{.formdata.Action}} method={{.formdata.Method}}>
 <div class="field">
   <label class="label">Pacjent</label>
@@ -48,6 +49,7 @@
   </div>
 </div>
 </form>
+<!-- after end visit.tmpl curvis -->
 {{end}}
 
 {{ with .err }}
