@@ -30,20 +30,16 @@ class States {
     this.whole = states.filter(s => s.Whole === true)
     this.part = states.filter(s => s.Whole === false)
     console.log("whole and part: ", this.whole, this.part)
-  }
+    this.statesmap = new Map()
+    for (let s of states) {
+      this.statesmap.set(s.Id, s)
 
-  getStatesIterator(iswhole) {
-    function *giterator(tab) {
-      let idx = 0
-      let len = tab.length
-      while (true) {
-        yield tab[idx % len]
-        idx +=1 
-      }
     }
-
-    return iswhole ? giterator(this.whole) : giterator(this.part)
   }
+  get(stateid) {
+    return this.statesmap.get(stateid)
+  }
+
 }
 export class App {
   constructor (data) {
@@ -51,6 +47,7 @@ export class App {
     this.tooth_drawer = new ToothDrawer(data, this.es)
     this.states_drawer = new StatesDrawer(data)
     this.sender = new Sender(data.pid, data.vid, this.es)
+    this.tooth_drawer.updateWithChanges(data.changes)
   }
 }
 
@@ -96,9 +93,8 @@ class StatesDrawer {
 }
 
 class ToothDrawer {
-  constructor ({name, wi, hi, states, changes}, es) {
+  constructor ({name, wi, hi, states}, es) {
     this.es = es
-    console.log(`Name: ${name}, states`, states, changes)
     this.draw = SVG().addTo(name).size(wi, hi)
     this.d = this.data(wi, hi, 16, 10, text_size(this.draw, {example: "12", fontsize: 12}))
     this.draw.translate(this.d.canvas_margin, 0)
@@ -111,6 +107,15 @@ class ToothDrawer {
       {type: "kid", ranges: [[85, 81], [71, 75]]},
       {type: "adult", ranges: [[48, 41], [31, 38]]}]
     row_data.forEach((rd, idx) => this.draw_row(idx, rd))
+  }
+
+  updateWithChanges(changes) {
+    for (let c of changes) {
+      console.log(`Updating change`, c)
+      let s = this.states.get(c.StateId)
+      this.updateState({toothnum: c.ToothNum, i: c.ToothSide}, s)
+
+    }
   }
 
   data(wi, hi, n_adult, n_kid, textsize) {
@@ -145,23 +150,42 @@ class ToothDrawer {
     return g
   }
 
+  /*
+   * Draws next state change according to switcher tables
+   * and emits "update" signal
+   * */
   onclick(v) {
-    return (e) => this.updateState(v)  
+    return (e) => {
+      let toothside = v.i
+      let toothnum = v.toothnum
+      let switcher = this.teeth.get(toothnum)
+
+      let s = toothside !== undefined ? 
+        switcher.nextPartState(toothside) : 
+        switcher.nextState()
+
+      this.updateState(v, s)  
+      this.es.emit("update", 
+        {toothnum, stateid: s.Id, toothside})
+    }
   }
 
-  updateState(v) {
+  /*
+   * Draws appropriate state change according to given state
+   * v.i - number of a part
+   * v.toothnum - number of a tooth
+   * */
+  updateState(v, s) {
+    console.log(`updateState`, v, s)
     let toothside = v.i
     let toothnum = v.toothnum
     let switcher = this.teeth.get(toothnum)
-    let stateid
-    if (toothside !== undefined) {
-      stateid = switcher.updatePart(toothside)
+    if (s.Whole) {
+      switcher.updateWhole(s)
     } else {
-      stateid = switcher.updateWhole()
+      switcher.updatePart(toothside, s)
     }
 
-    this.es.emit("update", 
-      {toothnum, stateid, toothside})
 
   }
 
@@ -247,25 +271,37 @@ class Switcher{
     this.p = this.t.get("parts")
   }
 
-  updateWhole() {
+
+  nextState(){
     this.stateIdx = (this.stateIdx + 1) % this.states.whole.length
-    let s = this.states.whole[this.stateIdx]
+    return this.states.whole[this.stateIdx]
+  }
+
+  updateWhole(s) {
     if (s.Id !== 0) {
-    this.c = this.c.replace(this.c.parent().path(s.Svgpath).fill({color: "#777"}).stroke({color: "black"}).scale(0.5, 0, 0).move(4, 0))
-    this.p.hide()
-    this.c.show()
+      this.c = this.c.replace(this.c.parent()
+        .path(s.Svgpath)
+        .fill({color: "#777"})
+        .stroke({color: "black"})
+        .scale(0.5, 0, 0)
+        .move(4, 0))
+      this.p.hide()
+      this.c.show()
     } else {
-    this.p.show()
-    this.c.hide()
+      this.p.show()
+      this.c.hide()
     }
     return s.Id
   }
 
-  updatePart(partid) {
-    let nextIdx = (this.partsIdx[partid] + 1) % this.states.part.length
-    this.partsIdx[partid] = nextIdx 
-    let s = this.states.part[nextIdx]
-    console.log("part update: ", nextIdx, this.states.part, s)
+  nextPartState(partid) {
+    let stateIdx = (this.partsIdx[partid] + 1) % this.states.part.length
+    this.partsIdx[partid] = stateIdx 
+    return this.states.part[stateIdx]
+  }
+
+  updatePart(partid, s) {
+    console.log("part update: ", partid,  s)
     this.p.get(partid).attr({fill: s.Color})
     this.p.show()
     this.c.hide()

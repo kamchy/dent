@@ -111,16 +111,7 @@ func DefineVisitRoutes(r *gin.Engine) {
 			v, err = visits.Add(vis)
 			vis.Id = v
 		}
-		p := GetId(c)
-
-		c.HTML(http.StatusOK, "visits.tmpl", gin.H{
-			"title":    "Nowa wizyta",
-			"nav":      getNav(),
-			"visits":   visits.GetByPatientId(p),
-			"currvis":  vis,
-			"curr":     patients.GetById(p),
-			"formdata": FormData{Action: vis.GetLink(), Method: "POST"},
-		})
+		c.Redirect(http.StatusSeeOther, vis.GetLink())
 	})
 
 	r.POST("visits/:id/delete", func(c *gin.Context) {
